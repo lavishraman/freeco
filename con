@@ -1,0 +1,53 @@
+package com.raman.backend.controller;
+
+import com.raman.backend.model.Clothing;
+import com.raman.backend.repository.ClothingRepository;
+import com.raman.backend.service.ClothingService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+public class ClothingController {
+    @Autowired
+    private ClothingService clothingService;
+    @Autowired
+    private ClothingRepository clothingRepository;
+
+    @PostMapping("/clothing")
+    Clothing newClothing(@RequestBody Clothing newClothing) {
+        return clothingRepository.save(newClothing);
+    }
+
+    @PutMapping("/clothing/{id}")
+    Clothing updateClothing(@RequestBody Clothing newClothing, @PathVariable Long id){
+        return clothingRepository.findById(id)
+                .map(clothing -> {
+                    clothing.setProductColor(newClothing.getProductColor());
+                    clothing.setProductName(newClothing.getProductName());
+                    clothing.setProductType(newClothing.getProductType());
+                    clothing.setProductPrice(newClothing.getProductPrice());
+                    return clothingRepository.save(clothing);
+                }).orElseThrow(()-> {return null;});
+    }
+
+    @DeleteMapping("/clothing/{id}")
+    String deleteClothing(@PathVariable Long id) {
+        if(!clothingRepository.existsById(id)) {
+            return null;
+        }
+        clothingRepository.deleteById(id);
+        return id+" :Deleted";
+    }
+
+    @GetMapping("/clothing")
+    List<Clothing> getAllClothing() {
+        return clothingRepository.findAll();
+    }
+
+    @GetMapping("/clothing/{id}")
+    public Clothing getClothing(@PathVariable Long id) {
+        return clothingService.getClothing(id);
+    }
+}
